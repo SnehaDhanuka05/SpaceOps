@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db_test:
+    image: postgres:15-alpine
+    container_name: spaceops_db_test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: spaceops_test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  redis_test:
+    image: redis:7-alpine
+    container_name: spaceops_redis_test
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  sut:
+    build: .
+    container_name: spaceops_sut
+    command: pytest -v
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db_test:5432/spaceops_test
+      - REDIS_URL=redis://redis_test:6379/0
+      - CELERY_BROKER_URL=redis://redis_test:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis_test:6379/0
+      - APP_ENV=testing
+    depends_on:
+      db_test:
+        condition: service_healthy
+      redis_test:
+        condition: service_healthy
