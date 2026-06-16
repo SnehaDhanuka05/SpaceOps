@@ -4,7 +4,6 @@ from app.services.ai_service import AIService
 
 router = APIRouter()
 
-
 @router.post("/explain/space-weather", response_model=AIExplanationResponse)
 async def explain_space_weather(request: AIExplanationRequest):
     explanation, cached = await AIService.get_explanation("space-weather", request.data_id, request.data_summary)

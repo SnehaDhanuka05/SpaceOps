@@ -15,7 +15,6 @@ class Settings(BaseSettings):
 
     # API Keys
     NASA_API_KEY: str = "DEMO_KEY"
-    CLAUDE_API_KEY: str = ""
 
     # Ollama Settings
     OLLAMA_BASE_URL: str = "http://localhost:11434"

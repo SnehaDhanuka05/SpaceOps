@@ -43,7 +43,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - NASA_API_KEY=DEMO_KEY
-      - CLAUDE_API_KEY=your-api-key
     depends_on:
       db:
         condition: service_healthy
@@ -53,7 +52,7 @@ services:
   worker:
     build: .
     container_name: spaceops_worker
-    command: celery -A app.tasks.celery_app worker --loglevel=info
+    command: celery -A app.tasks.celery_app worker -Q celery --loglevel=info
     volumes:
       - .:/code
     environment:
@@ -62,7 +61,24 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - NASA_API_KEY=DEMO_KEY
-      - CLAUDE_API_KEY=your-api-key
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  ai_worker:
+    build: .
+    container_name: spaceops_ai_worker
+    command: celery -A app.tasks.celery_app worker -Q ai -c 1 --loglevel=info
+    volumes:
+      - .:/code
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/spaceops
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - NASA_API_KEY=DEMO_KEY
     depends_on:
       db:
         condition: service_healthy
