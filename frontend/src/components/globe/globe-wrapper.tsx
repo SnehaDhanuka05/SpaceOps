@@ -1,11 +1,15 @@
 "use client";
+import { useSpaceStore } from "@/store/use-space-store";
 
 import React, { Suspense, useState, useRef, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import EarthMesh from "./earth-mesh";
+import NEOMarker from "./neo-marker";
+import LaunchMarker from "./launch-marker";
 import { latLonToVector3 } from "@/utils/coords";
+import { useNEOHazards, useLaunchSchedule } from "@/hooks/use-space-data";
 
 interface GlobeWrapperProps {
   issLat?: number;
@@ -63,18 +67,30 @@ function CameraController({
 }
 
 export default function GlobeWrapper({
-  issLat,
-  issLon,
   trackISS = false,
 }: GlobeWrapperProps) {
   const [isInteracting, setIsInteracting] = useState(false);
+  const issLocation = useSpaceStore((state) => state.issLocation);
+  const issLat = issLocation?.latitude;
+  const issLon = issLocation?.longitude;
+  const hoveredNeoId = useSpaceStore((state) => state.hoveredNeoId);
+  const hoveredLaunchId = useSpaceStore((state) => state.hoveredLaunchId);
+  const setSelectedEntity = useSpaceStore((state) => state.setSelectedEntity);
+  const showISS = useSpaceStore((state) => state.showISS);
+  const showNEOs = useSpaceStore((state) => state.showNEOs);
+  const showLaunches = useSpaceStore((state) => state.showLaunches);
+  const showWeather = useSpaceStore((state) => state.showWeather);
+  
+  const { data: neoData } = useNEOHazards(true, 10); // Fetch top 10 hazardous NEOs
+  const { data: launchesData } = useLaunchSchedule(10); // Fetch upcoming launches
 
   return (
     <div className="w-full h-full relative bg-[#03030c]">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 45 }}
         style={{ width: "100%", height: "100%" }}
-        gl={{ antialias: true }}
+        gl={{ antialias: true, powerPreference: "high-performance" }}
+        dpr={[1, 2]}
       >
         <Suspense fallback={null}>
           {/* Cosmic Starfield */}
@@ -98,13 +114,35 @@ export default function GlobeWrapper({
           {/* Gentle fill light */}
           <ambientLight intensity={0.1} />
 
-          {/* Rotating Earth, atmosphere and ISS satellite */}
-          <EarthMesh
-            issLat={issLat}
-            issLon={issLon}
-            autoRotate={!trackISS}
+          {/* Earth Mesh and its intrinsic visuals (trails, weather) */}
+          <EarthMesh 
+            issLat={issLat} 
+            issLon={issLon} 
             isInteracting={isInteracting}
+            autoRotate={!trackISS}
+            showISS={showISS}
+            showWeather={showWeather}
           />
+
+          {/* NEO Hazard Markers */}
+          {showNEOs && neoData?.map((neo) => (
+            <NEOMarker 
+              key={neo.id} 
+              neo={neo} 
+              isHovered={hoveredNeoId === neo.neo_reference_id}
+              onClick={() => setSelectedEntity({ id: neo.neo_reference_id, type: 'neo' })}
+            />
+          ))}
+
+          {/* Launch Site Markers */}
+          {showLaunches && launchesData?.map((launch) => (
+            <LaunchMarker
+              key={launch.id}
+              launch={launch}
+              isHovered={hoveredLaunchId === launch.launch_id}
+              onClick={() => setSelectedEntity({ id: launch.launch_id, type: 'launch' })}
+            />
+          ))}
 
           <CameraController
             issLat={issLat}

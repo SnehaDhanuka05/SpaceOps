@@ -4,11 +4,16 @@ import React, { useState } from "react";
 import { useNEOHazards, useSyncNEOHazards, useAIExplanation } from "@/hooks/use-space-data";
 import { ShieldAlert, RefreshCw, AlertTriangle, Sparkles, HelpCircle, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSpaceStore } from "@/store/use-space-store";
 
 export default function NEOPanel() {
   const { data: neoList, isLoading, error } = useNEOHazards(true, 10);
   const syncNeo = useSyncNEOHazards();
   const { getExplanation, loading: aiLoading } = useAIExplanation();
+  const setHoveredNeoId = useSpaceStore((state) => state.setHoveredNeoId);
+  const hoveredNeoId = useSpaceStore((state) => state.hoveredNeoId);
+  const setSelectedEntity = useSpaceStore((state) => state.setSelectedEntity);
 
   const [explainingId, setExplainingId] = useState<string | null>(null);
   const [explanationMap, setExplanationMap] = useState<Record<string, string>>({});
@@ -23,7 +28,6 @@ export default function NEOPanel() {
 
   const handleExplain = async (id: string, name: string, missDist: number, speed: number) => {
     if (explanationMap[id]) {
-      // Toggle
       setExplanationMap((prev) => {
         const next = { ...prev };
         delete next[id];
@@ -50,7 +54,7 @@ export default function NEOPanel() {
         <div className="flex items-center gap-2">
           <ShieldAlert className="h-4 w-4 text-amber-500" />
           <h2 className="text-sm font-semibold tracking-wider font-mono text-zinc-100">
-            NEO HAZARDS (CLOSE PROXIMITY)
+            NEO HAZARDS
           </h2>
         </div>
         <Button
@@ -65,8 +69,10 @@ export default function NEOPanel() {
       </div>
 
       {isLoading && (
-        <div className="py-8 text-center text-xs font-mono text-zinc-500 animate-pulse">
-          SCANNING PROXIMITY TRAJECTORIES...
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-[90px] w-full bg-white/10 rounded-lg" />
+          ))}
         </div>
       )}
 
@@ -87,7 +93,14 @@ export default function NEOPanel() {
           {neoList.map((neo) => (
             <div
               key={neo.neo_reference_id}
-              className="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2 hover:bg-white/10 transition-colors"
+              className={`p-3 rounded-lg border space-y-2 transition-colors cursor-pointer ${
+                hoveredNeoId === neo.neo_reference_id
+                  ? "bg-white/10 border-amber-500/50"
+                  : "bg-white/5 border-white/5 hover:bg-white/10"
+              }`}
+              onMouseEnter={() => setHoveredNeoId(neo.neo_reference_id)}
+              onMouseLeave={() => setHoveredNeoId(null)}
+              onClick={() => setSelectedEntity({ id: neo.neo_reference_id, type: 'neo' })}
             >
               <div className="flex justify-between items-start">
                 <div>

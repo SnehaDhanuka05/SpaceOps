@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/providers/query-provider";
+import { Toaster } from "sonner";
 
 const outfit = Outfit({
   variable: "--font-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
     >
       <body className="h-full w-full bg-background text-foreground font-sans overflow-hidden select-none">
         <QueryProvider>{children}</QueryProvider>
+        <Toaster theme="dark" position="top-center" />
       </body>
     </html>
   );

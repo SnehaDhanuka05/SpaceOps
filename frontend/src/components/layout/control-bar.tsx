@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Activity, Clock, RefreshCw, Radio, Globe2, Moon } from "lucide-react";
+import { RefreshCw, Globe2, Target, ShieldAlert, Rocket, Sun, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSpaceStore } from "@/store/use-space-store";
 
 interface ControlBarProps {
   onSyncAll: () => void;
@@ -12,6 +13,16 @@ interface ControlBarProps {
 }
 
 export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
+  const connectionStatus = useSpaceStore((state) => state.connectionStatus);
+  const showISS = useSpaceStore((state) => state.showISS);
+  const setShowISS = useSpaceStore((state) => state.setShowISS);
+  const showNEOs = useSpaceStore((state) => state.showNEOs);
+  const setShowNEOs = useSpaceStore((state) => state.setShowNEOs);
+  const showLaunches = useSpaceStore((state) => state.showLaunches);
+  const setShowLaunches = useSpaceStore((state) => state.setShowLaunches);
+  const showWeather = useSpaceStore((state) => state.showWeather);
+  const setShowWeather = useSpaceStore((state) => state.setShowWeather);
+  
   const [utcTime, setUtcTime] = useState("");
 
   useEffect(() => {
@@ -38,29 +49,50 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
             SPACEOPS
           </h1>
         </div>
-        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded border border-cyan-500/30 text-cyan-400 bg-cyan-950/20">
-          Telemetry Active
-        </span>
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/5 bg-black/20">
+          <div
+            className={`h-2 w-2 rounded-full ${
+              connectionStatus === "connected"
+                ? "bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                : connectionStatus === "connecting"
+                ? "bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.5)]"
+                : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+            }`}
+          />
+          <span className="text-[10px] uppercase font-mono text-zinc-400">
+            {connectionStatus === "connected"
+              ? "Live"
+              : connectionStatus === "connecting"
+              ? "Connecting"
+              : "Offline"}
+          </span>
+        </div>
       </div>
 
-      {/* Center - Stats Overview */}
-      <div className="hidden md:flex items-center gap-6 text-xs font-mono text-zinc-400">
-        <div className="flex items-center gap-2 border-r border-white/5 pr-6">
-          <Clock className="h-4 w-4 text-teal-400" />
-          <span>{utcTime}</span>
-        </div>
-        <div className="flex items-center gap-2 border-r border-white/5 pr-6">
-          <Radio className="h-4 w-4 text-indigo-400" />
-          <span>ISS: <span className="text-zinc-200">Orbiting</span></span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-emerald-400" />
-          <span>Solar Storms: <span className="text-emerald-400">Low</span></span>
-        </div>
+      {/* Center - Layer Toggles */}
+      <div className="hidden md:flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-lg border border-white/10">
+        <span className="text-[10px] font-mono text-zinc-500 mr-2 uppercase">Layers:</span>
+        <button onClick={() => setShowISS(!showISS)} className={`p-1.5 rounded-md transition-colors ${showISS ? 'bg-cyan-500/20 text-cyan-400' : 'text-zinc-500 hover:text-zinc-300'}`} title="Toggle ISS">
+          <Target className="h-4 w-4" />
+        </button>
+        <button onClick={() => setShowNEOs(!showNEOs)} className={`p-1.5 rounded-md transition-colors ${showNEOs ? 'bg-amber-500/20 text-amber-400' : 'text-zinc-500 hover:text-zinc-300'}`} title="Toggle NEOs">
+          <ShieldAlert className="h-4 w-4" />
+        </button>
+        <button onClick={() => setShowLaunches(!showLaunches)} className={`p-1.5 rounded-md transition-colors ${showLaunches ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-500 hover:text-zinc-300'}`} title="Toggle Launches">
+          <Rocket className="h-4 w-4" />
+        </button>
+        <button onClick={() => setShowWeather(!showWeather)} className={`p-1.5 rounded-md transition-colors ${showWeather ? 'bg-orange-500/20 text-orange-400' : 'text-zinc-500 hover:text-zinc-300'}`} title="Toggle Space Weather">
+          <Sun className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-2 text-[10px] font-mono text-zinc-500 border border-white/10 bg-black/30 px-3 py-1.5 rounded-md">
+          <Search className="h-3.5 w-3.5" />
+          <span>Press ⌘K to search</span>
+        </div>
+
         <Button
           onClick={onSyncAll}
           disabled={isSyncing}
@@ -69,7 +101,7 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
           className="relative overflow-hidden group h-9 border-white/10 hover:border-cyan-500/50 hover:bg-cyan-950/20 transition-all duration-300 gap-2 font-mono text-xs text-zinc-300 hover:text-cyan-400"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin text-cyan-400" : "group-hover:rotate-180 transition-transform duration-500"}`} />
-          <span>{isSyncing ? "Syncing..." : "Sync All Systems"}</span>
+          <span>{isSyncing ? "Syncing..." : "Sync All"}</span>
         </Button>
       </div>
     </header>

@@ -9,10 +9,15 @@ import SpaceWeatherPanel from "@/components/dashboard/weather-panel";
 import LaunchesPanel from "@/components/dashboard/launches-panel";
 import GlobeWrapper from "@/components/globe/globe-wrapper";
 import { useISS, useSyncISS, useSyncNEOHazards, useSyncSpaceWeather, useSyncLaunchSchedule } from "@/hooks/use-space-data";
+import { useWebSocketManager } from "@/hooks/use-websocket";
+import DetailSheet from "@/components/layout/detail-sheet";
+import GlobalSearch from "@/components/layout/global-search";
+import { ErrorBoundary } from "@/components/layout/error-boundary";
 import { Target, ShieldAlert, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
+  useWebSocketManager();
   const { data: issData } = useISS();
   const [trackISS, setTrackISS] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -43,11 +48,11 @@ export default function Home() {
     <div className="relative w-screen h-screen overflow-hidden flex flex-col">
       {/* 3D Globe Underlay */}
       <div className="absolute inset-0 z-0">
-        <GlobeWrapper
-          issLat={issData?.latitude}
-          issLon={issData?.longitude}
-          trackISS={trackISS}
-        />
+        <ErrorBoundary>
+          <GlobeWrapper
+            trackISS={trackISS}
+          />
+        </ErrorBoundary>
       </div>
 
       {/* Top Navigation Control Bar */}
@@ -73,15 +78,22 @@ export default function Home() {
         </div>
 
         {/* Real-time Telemetry Panel */}
-        <ISSPanel />
+        <ErrorBoundary>
+          <ISSPanel />
+        </ErrorBoundary>
       </div>
 
       {/* Right Sidebar Stack Container */}
-      <PanelStack>
-        <SpaceWeatherPanel />
-        <NEOPanel />
-        <LaunchesPanel />
-      </PanelStack>
+      <ErrorBoundary>
+        <PanelStack>
+          <SpaceWeatherPanel />
+          <NEOPanel />
+          <LaunchesPanel />
+        </PanelStack>
+      </ErrorBoundary>
+
+      <DetailSheet />
+      <GlobalSearch />
 
       {/* Bottom overlay decorative lines */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/5 bg-black/30 backdrop-blur-sm text-[9px] font-mono text-zinc-500">

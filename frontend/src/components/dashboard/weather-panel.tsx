@@ -4,11 +4,16 @@ import React, { useState } from "react";
 import { useSpaceWeather, useSyncSpaceWeather, useAIExplanation } from "@/hooks/use-space-data";
 import { Flame, RefreshCw, Sun, Activity, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSpaceStore } from "@/store/use-space-store";
 
 export default function SpaceWeatherPanel() {
   const { data: weatherList, isLoading, error } = useSpaceWeather(10);
   const syncWeather = useSyncSpaceWeather();
   const { getExplanation, loading: aiLoading } = useAIExplanation();
+  const hoveredWeatherEventId = useSpaceStore((state) => state.hoveredWeatherEventId);
+  const setHoveredWeatherEventId = useSpaceStore((state) => state.setHoveredWeatherEventId);
+  const setSelectedEntity = useSpaceStore((state) => state.setSelectedEntity);
 
   const [explainingId, setExplainingId] = useState<string | null>(null);
   const [explanationMap, setExplanationMap] = useState<Record<string, string>>({});
@@ -64,8 +69,10 @@ export default function SpaceWeatherPanel() {
       </div>
 
       {isLoading && (
-        <div className="py-8 text-center text-xs font-mono text-zinc-500 animate-pulse">
-          DIAGNOSING SOLAR RADIATION LEVEL...
+        <div className="space-y-3">
+          {[1, 2].map(i => (
+            <Skeleton key={i} className="h-[100px] w-full bg-white/10 rounded-lg" />
+          ))}
         </div>
       )}
 
@@ -86,7 +93,14 @@ export default function SpaceWeatherPanel() {
           {weatherList.map((alert) => (
             <div
               key={alert.event_id}
-              className="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2 hover:bg-white/10 transition-colors"
+              className={`p-3 rounded-lg border space-y-2 transition-colors cursor-pointer ${
+                hoveredWeatherEventId === alert.event_id
+                  ? "bg-white/10 border-red-500/50"
+                  : "bg-white/5 border-white/5 hover:bg-white/10"
+              }`}
+              onMouseEnter={() => setHoveredWeatherEventId(alert.event_id)}
+              onMouseLeave={() => setHoveredWeatherEventId(null)}
+              onClick={() => setSelectedEntity({ id: alert.event_id, type: 'weather' })}
             >
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">

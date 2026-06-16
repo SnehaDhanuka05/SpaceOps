@@ -1,12 +1,16 @@
 "use client";
 
 import React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useISS, useSyncISS } from "@/hooks/use-space-data";
+import { useSpaceStore } from "@/store/use-space-store";
 import { Navigation, Compass, AlertCircle, RefreshCw, Milestone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ISSPanel() {
-  const { data: telemetry, isLoading, error } = useISS();
+  const { data: queryTelemetry, isLoading, error } = useISS();
+  const issLocation = useSpaceStore((state) => state.issLocation);
+  const telemetry = issLocation || queryTelemetry;
   const syncISS = useSyncISS();
 
   const handleSync = async () => {
@@ -38,8 +42,16 @@ export default function ISSPanel() {
       </div>
 
       {isLoading && (
-        <div className="py-8 text-center text-xs font-mono text-zinc-500 animate-pulse">
-          FETCHING ISS ORBITAL TELEMETRY...
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
+            <Skeleton className="h-16 w-full bg-white/10 rounded-lg" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-full bg-white/10 rounded" />
+            <Skeleton className="h-6 w-full bg-white/10 rounded" />
+            <Skeleton className="h-6 w-full bg-white/10 rounded" />
+          </div>
         </div>
       )}
 

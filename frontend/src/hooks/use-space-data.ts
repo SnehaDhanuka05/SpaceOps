@@ -15,66 +15,11 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
 
 // --- ISS HOOKS ---
 export function useISS() {
-  const queryClient = useQueryClient();
-
   const query = useQuery<ISSTelemetry>({
     queryKey: ["iss-telemetry"],
     queryFn: () => apiFetch<ISSTelemetry>("/api/v1/iss/"),
     refetchInterval: 30000, // Fallback poll every 30 seconds
   });
-
-  // WebSocket for real-time ISS updates
-  useEffect(() => {
-    let ws: WebSocket | null = null;
-    let reconnectTimeout: NodeJS.Timeout;
-
-    const connect = () => {
-      ws = new WebSocket(`${WS_URL}/api/v1/iss/ws`);
-
-      ws.onopen = () => {
-        console.log("ISS WebSocket connected");
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data && data.event === "iss_update") {
-            // Update the React Query cache immediately
-            queryClient.setQueryData<ISSTelemetry>(["iss-telemetry"], (prev) => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                latitude: data.latitude,
-                longitude: data.longitude,
-                altitude: data.altitude,
-                velocity: data.velocity,
-                timestamp: data.timestamp,
-              };
-            });
-          }
-        } catch (err) {
-          console.error("Failed to parse ISS WebSocket data:", err);
-        }
-      };
-
-      ws.onclose = () => {
-        console.log("ISS WebSocket closed, reconnecting...");
-        reconnectTimeout = setTimeout(connect, 5000);
-      };
-
-      ws.onerror = (err) => {
-        console.error("ISS WebSocket error:", err);
-        ws?.close();
-      };
-    };
-
-    connect();
-
-    return () => {
-      if (ws) ws.close();
-      clearTimeout(reconnectTimeout);
-    };
-  }, [queryClient]);
 
   return query;
 }

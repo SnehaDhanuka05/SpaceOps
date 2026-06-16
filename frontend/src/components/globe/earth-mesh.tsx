@@ -2,26 +2,33 @@
 
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
+import { useTexture, Line } from "@react-three/drei";
 import * as THREE from "three";
 import { latLonToVector3 } from "@/utils/coords";
+import AuroraZone from "./aurora-zone";
+import SolarStormParticles from "./solar-storm-particles";
 
 interface EarthMeshProps {
   issLat?: number;
   issLon?: number;
-  autoRotate: boolean;
-  isInteracting: boolean;
+  autoRotate?: boolean;
+  isInteracting?: boolean;
+  showISS?: boolean;
+  showWeather?: boolean;
 }
 
 function EarthMeshInner({
   issLat,
   issLon,
-  autoRotate,
-  isInteracting,
+  autoRotate = true,
+  isInteracting = false,
+  showISS = true,
+  showWeather = true,
 }: EarthMeshProps) {
   const earthRef = useRef<THREE.Mesh>(null);
   const cloudRef = useRef<THREE.Mesh>(null);
   const issRef = useRef<THREE.Group>(null);
+  const [isHovered, setHovered] = useState(false);
 
   // Load textures using drei's useTexture (works correctly with Suspense)
   const textures = useTexture({
@@ -70,10 +77,17 @@ function EarthMeshInner({
 
   // Calculate ISS 3D Position
   const [issPos, setIssPos] = useState<[number, number, number]>([0, 0, 0]);
+  const [trail, setTrail] = useState<THREE.Vector3[]>([]);
 
   useEffect(() => {
     if (issLat !== undefined && issLon !== undefined) {
-      setIssPos(latLonToVector3(issLat, issLon, 2.25));
+      const newPos = latLonToVector3(issLat, issLon, 2.25);
+      setIssPos(newPos);
+      setTrail((prev) => {
+        const newTrail = [...prev, new THREE.Vector3(...newPos)];
+        if (newTrail.length > 200) newTrail.shift();
+        return newTrail;
+      });
     }
   }, [issLat, issLon]);
 
@@ -122,28 +136,19 @@ function EarthMeshInner({
       </mesh>
 
       {/* ISS satellite marker */}
-      {issLat !== undefined && issLon !== undefined && (
-        <group ref={issRef} position={issPos}>
-          {/* Beacon pulse */}
+      {showISS && issLat !== undefined && issLon !== undefined && (
+        <group ref={issRef} position={issPos} scale={isHovered ? 1.5 : 1} onPointerOver={() => setHovered(true)} onPointerOut={() => setHovered(false)}>
+          {/* Main Body */}
           <mesh>
-            <sphereGeometry args={[0.08, 16, 16]} />
-            <meshBasicMaterial
-              color="#22d3ee"
-              transparent={true}
-              opacity={0.6}
-              blending={THREE.AdditiveBlending}
-            />
+            <cylinderGeometry args={[0.03, 0.03, 0.15, 8]} />
+            <meshStandardMaterial color="#d4d4d8" metalness={0.8} roughness={0.2} />
           </mesh>
-          <mesh scale={[1.8, 1.8, 1.8]}>
-            <sphereGeometry args={[0.08, 8, 8]} />
-            <meshBasicMaterial
-              color="#06b6d4"
-              transparent={true}
-              opacity={0.25}
-              blending={THREE.AdditiveBlending}
-            />
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.15, 8]} />
+            <meshStandardMaterial color="#d4d4d8" metalness={0.8} roughness={0.2} />
           </mesh>
-          {/* Tiny structural model representing solar panels */}
+          
+          {/* Solar Panels */}
           <mesh rotation={[0, 0, Math.PI / 4]}>
             <boxGeometry args={[0.02, 0.25, 0.06]} />
             <meshStandardMaterial color="#3f3f46" metalness={0.8} roughness={0.2} />
@@ -153,6 +158,25 @@ function EarthMeshInner({
             <meshStandardMaterial color="#3f3f46" metalness={0.8} roughness={0.2} />
           </mesh>
         </group>
+      )}
+
+      {/* Orbital Trail */}
+      {showISS && trail.length > 1 && (
+        <Line
+          points={trail}
+          color="#06b6d4"
+          lineWidth={2}
+          transparent={true}
+          opacity={0.4}
+        />
+      )}
+
+      {/* Space Weather Visuals */}
+      {showWeather && (
+        <>
+          <AuroraZone />
+          <SolarStormParticles />
+        </>
       )}
     </group>
   );

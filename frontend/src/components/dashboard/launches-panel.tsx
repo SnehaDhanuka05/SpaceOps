@@ -4,11 +4,16 @@ import React, { useState } from "react";
 import { useLaunchSchedule, useSyncLaunchSchedule, useAIExplanation } from "@/hooks/use-space-data";
 import { Rocket, RefreshCw, Calendar, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSpaceStore } from "@/store/use-space-store";
 
 export default function LaunchesPanel() {
   const { data: launchList, isLoading, error } = useLaunchSchedule(10);
   const syncLaunches = useSyncLaunchSchedule();
   const { getExplanation, loading: aiLoading } = useAIExplanation();
+  const setHoveredLaunchId = useSpaceStore((state) => state.setHoveredLaunchId);
+  const hoveredLaunchId = useSpaceStore((state) => state.hoveredLaunchId);
+  const setSelectedEntity = useSpaceStore((state) => state.setSelectedEntity);
 
   const [explainingId, setExplainingId] = useState<string | null>(null);
   const [explanationMap, setExplanationMap] = useState<Record<string, string>>({});
@@ -64,8 +69,10 @@ export default function LaunchesPanel() {
       </div>
 
       {isLoading && (
-        <div className="py-8 text-center text-xs font-mono text-zinc-500 animate-pulse">
-          QUEUING LAUNCH SCHEDULE FEEDS...
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-[120px] w-full bg-white/10 rounded-lg" />
+          ))}
         </div>
       )}
 
@@ -86,7 +93,14 @@ export default function LaunchesPanel() {
           {launchList.map((launch) => (
             <div
               key={launch.launch_id}
-              className="p-3 rounded-lg bg-white/5 border border-white/5 space-y-2 hover:bg-white/10 transition-colors"
+              className={`p-3 rounded-lg border space-y-2 transition-colors cursor-pointer ${
+                hoveredLaunchId === launch.launch_id
+                  ? "bg-white/10 border-indigo-500/50"
+                  : "bg-white/5 border-white/5 hover:bg-white/10"
+              }`}
+              onMouseEnter={() => setHoveredLaunchId(launch.launch_id)}
+              onMouseLeave={() => setHoveredLaunchId(null)}
+              onClick={() => setSelectedEntity({ id: launch.launch_id, type: 'launch' })}
             >
               <div className="flex justify-between items-start">
                 <div>
