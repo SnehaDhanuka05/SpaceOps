@@ -80,7 +80,7 @@ export default function GlobeWrapper({
   const showNEOs = useSpaceStore((state) => state.showNEOs);
   const showLaunches = useSpaceStore((state) => state.showLaunches);
   const showWeather = useSpaceStore((state) => state.showWeather);
-  
+
   const { data: neoData } = useNEOHazards(true, 10); // Fetch top 10 hazardous NEOs
   const { data: launchesData } = useLaunchSchedule(10); // Fetch upcoming launches
 
@@ -107,42 +107,42 @@ export default function GlobeWrapper({
           {/* Core sunlight (Directional) */}
           <directionalLight
             position={[5, 3, 5]}
-            intensity={1.5}
+            intensity={2}
             castShadow
           />
 
           {/* Gentle fill light */}
-          <ambientLight intensity={0.1} />
+          <ambientLight intensity={0.5} />
 
           {/* Earth Mesh and its intrinsic visuals (trails, weather) */}
-          <EarthMesh 
-            issLat={issLat} 
-            issLon={issLon} 
+          <EarthMesh
+            issLat={issLat}
+            issLon={issLon}
             isInteracting={isInteracting}
             autoRotate={!trackISS}
             showISS={showISS}
             showWeather={showWeather}
-          />
+          >
+            {/* NEO Hazard Markers */}
+            {showNEOs && neoData?.map((neo) => (
+              <NEOMarker
+                key={neo.id}
+                neo={neo}
+                isHovered={hoveredNeoId === neo.neo_reference_id}
+                onClick={() => setSelectedEntity({ id: neo.neo_reference_id, type: 'neo' })}
+              />
+            ))}
 
-          {/* NEO Hazard Markers */}
-          {showNEOs && neoData?.map((neo) => (
-            <NEOMarker 
-              key={neo.id} 
-              neo={neo} 
-              isHovered={hoveredNeoId === neo.neo_reference_id}
-              onClick={() => setSelectedEntity({ id: neo.neo_reference_id, type: 'neo' })}
-            />
-          ))}
-
-          {/* Launch Site Markers */}
-          {showLaunches && launchesData?.map((launch) => (
-            <LaunchMarker
-              key={launch.id}
-              launch={launch}
-              isHovered={hoveredLaunchId === launch.launch_id}
-              onClick={() => setSelectedEntity({ id: launch.launch_id, type: 'launch' })}
-            />
-          ))}
+            {/* Launch Site Markers */}
+            {showLaunches && launchesData?.map((launch) => (
+              <LaunchMarker
+                key={launch.id}
+                launch={launch}
+                isHovered={hoveredLaunchId === launch.launch_id}
+                onClick={() => setSelectedEntity({ id: launch.launch_id, type: 'launch' })}
+              />
+            ))}
+          </EarthMesh>
 
           <CameraController
             issLat={issLat}

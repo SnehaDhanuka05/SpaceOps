@@ -22,7 +22,7 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
   const setShowLaunches = useSpaceStore((state) => state.setShowLaunches);
   const showWeather = useSpaceStore((state) => state.showWeather);
   const setShowWeather = useSpaceStore((state) => state.setShowWeather);
-  
+
   const [utcTime, setUtcTime] = useState("");
 
   useEffect(() => {
@@ -51,20 +51,19 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
         </div>
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/5 bg-black/20">
           <div
-            className={`h-2 w-2 rounded-full ${
-              connectionStatus === "connected"
-                ? "bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                : connectionStatus === "connecting"
+            className={`h-2 w-2 rounded-full ${connectionStatus === "connected"
+              ? "bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+              : connectionStatus === "connecting"
                 ? "bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.5)]"
                 : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-            }`}
+              }`}
           />
           <span className="text-[10px] uppercase font-mono text-zinc-400">
             {connectionStatus === "connected"
               ? "Live"
               : connectionStatus === "connecting"
-              ? "Connecting"
-              : "Offline"}
+                ? "Connecting"
+                : "Offline"}
           </span>
         </div>
       </div>
@@ -72,17 +71,21 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
       {/* Center - Layer Toggles */}
       <div className="hidden md:flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-lg border border-white/10">
         <span className="text-[10px] font-mono text-zinc-500 mr-2 uppercase">Layers:</span>
-        <button onClick={() => setShowISS(!showISS)} className={`p-1.5 rounded-md transition-colors ${showISS ? 'bg-cyan-500/20 text-cyan-400' : 'text-zinc-500 hover:text-zinc-300'}`} title="Toggle ISS">
-          <Target className="h-4 w-4" />
+        <button onClick={() => setShowISS(!showISS)} className={`group flex items-center p-1.5 rounded-md transition-all duration-300 ease-in-out ${showISS ? 'bg-cyan-500/20 text-cyan-400' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}>
+          <Target className="h-4 w-4 shrink-0" />
+          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-[80px] group-hover:ml-1.5 group-hover:mr-0.5 transition-all duration-300 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100">ISS</span>
         </button>
-        <button onClick={() => setShowNEOs(!showNEOs)} className={`p-1.5 rounded-md transition-colors ${showNEOs ? 'bg-amber-500/20 text-amber-400' : 'text-zinc-500 hover:text-zinc-300'}`} title="Toggle NEOs">
-          <ShieldAlert className="h-4 w-4" />
+        <button onClick={() => setShowNEOs(!showNEOs)} className={`group flex items-center p-1.5 rounded-md transition-all duration-300 ease-in-out ${showNEOs ? 'bg-amber-500/20 text-amber-400' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}>
+          <ShieldAlert className="h-4 w-4 shrink-0" />
+          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-[80px] group-hover:ml-1.5 group-hover:mr-0.5 transition-all duration-300 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100">NEOs Hazards</span>
         </button>
-        <button onClick={() => setShowLaunches(!showLaunches)} className={`p-1.5 rounded-md transition-colors ${showLaunches ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-500 hover:text-zinc-300'}`} title="Toggle Launches">
-          <Rocket className="h-4 w-4" />
+        <button onClick={() => setShowLaunches(!showLaunches)} className={`group flex items-center p-1.5 rounded-md transition-all duration-300 ease-in-out ${showLaunches ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}>
+          <Rocket className="h-4 w-4 shrink-0" />
+          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-[80px] group-hover:ml-1.5 group-hover:mr-0.5 transition-all duration-300 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100">Launches</span>
         </button>
-        <button onClick={() => setShowWeather(!showWeather)} className={`p-1.5 rounded-md transition-colors ${showWeather ? 'bg-orange-500/20 text-orange-400' : 'text-zinc-500 hover:text-zinc-300'}`} title="Toggle Space Weather">
-          <Sun className="h-4 w-4" />
+        <button onClick={() => setShowWeather(!showWeather)} className={`group flex items-center p-1.5 rounded-md transition-all duration-300 ease-in-out ${showWeather ? 'bg-orange-500/20 text-orange-400' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}>
+          <Sun className="h-4 w-4 shrink-0" />
+          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-[80px] group-hover:ml-1.5 group-hover:mr-0.5 transition-all duration-300 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100">Space Weather</span>
         </button>
       </div>
 
