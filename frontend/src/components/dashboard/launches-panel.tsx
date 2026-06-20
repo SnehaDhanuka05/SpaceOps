@@ -140,14 +140,15 @@ export default function LaunchesPanel() {
                 </span>
 
                 <Button
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleExplain(
                       launch.launch_id,
                       launch.name,
                       launch.rocket_name || "Unknown Rocket",
                       launch.launch_pad || "Unknown Pad"
-                    )
-                  }
+                    );
+                  }}
                   disabled={explainingId === launch.launch_id}
                   variant="ghost"
                   size="sm"

@@ -151,14 +151,15 @@ export default function NEOPanel() {
                 </span>
 
                 <Button
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleExplain(
                       neo.neo_reference_id,
                       neo.name,
                       neo.miss_distance_km || 0,
                       neo.relative_velocity_kph || 0
-                    )
-                  }
+                    );
+                  }}
                   disabled={explainingId === neo.neo_reference_id}
                   variant="ghost"
                   size="sm"

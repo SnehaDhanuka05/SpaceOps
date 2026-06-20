@@ -108,7 +108,12 @@ export function useAIExplanation() {
     const cacheKey = `spaceops:ai-explain:${category}:${dataId}`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
-      return JSON.parse(cached);
+      const parsed = JSON.parse(cached);
+      // Don't use cached error fallbacks, fetch a fresh one
+      if (!parsed.includes("Error:")) {
+        return parsed;
+      }
+      localStorage.removeItem(cacheKey);
     }
 
     setLoading(true);
@@ -124,7 +129,10 @@ export function useAIExplanation() {
           }),
         }
       );
-      localStorage.setItem(cacheKey, JSON.stringify(response.explanation));
+      // Don't cache error fallbacks
+      if (!response.explanation.includes("Error:")) {
+        localStorage.setItem(cacheKey, JSON.stringify(response.explanation));
+      }
       return response.explanation;
     } catch (err: any) {
       const msg = err.message || "Failed to fetch AI explanation";

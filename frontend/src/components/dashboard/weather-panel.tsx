@@ -139,14 +139,15 @@ export default function SpaceWeatherPanel() {
                 </span>
 
                 <Button
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     handleExplain(
                       alert.event_id,
                       alert.event_type,
                       alert.severity || "Unknown",
                       alert.details || ""
-                    )
-                  }
+                    );
+                  }}
                   disabled={explainingId === alert.event_id}
                   variant="ghost"
                   size="sm"

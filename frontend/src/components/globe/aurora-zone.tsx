@@ -6,7 +6,7 @@ import { useSpaceStore } from "@/store/use-space-store";
 export default function AuroraZone() {
   const auroraRefNorth = useRef<THREE.Mesh>(null);
   const auroraRefSouth = useRef<THREE.Mesh>(null);
-  
+
   const hoveredWeatherEventId = useSpaceStore((state) => state.hoveredWeatherEventId);
   const intensity = hoveredWeatherEventId ? 0.8 : 0.2; // Increase intensity if a weather event is hovered
 
@@ -30,23 +30,23 @@ export default function AuroraZone() {
       {/* Northern Lights */}
       <mesh ref={auroraRefNorth} position={[0, 1.95, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.6, 1.2, 64]} />
-        <meshBasicMaterial 
-          color="#10b981" 
-          transparent 
-          opacity={0.3} 
+        <meshBasicMaterial
+          color="#134e3aff"
+          transparent
+          opacity={0.3}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
-      
+
       {/* Southern Lights */}
       <mesh ref={auroraRefSouth} position={[0, -1.95, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.6, 1.2, 64]} />
-        <meshBasicMaterial 
-          color="#34d399" 
-          transparent 
-          opacity={0.3} 
+        <meshBasicMaterial
+          color="#134e3aff"
+          transparent
+          opacity={0.3}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
