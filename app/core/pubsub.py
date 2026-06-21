@@ -12,6 +12,7 @@ async def redis_pubsub_listener():
     max_retry_delay = 30.0
 
     while True:
+        pubsub = None
         try:
             pubsub = async_redis_client.pubsub()
             await pubsub.subscribe("spaceops_live_channel")
@@ -32,3 +33,9 @@ async def redis_pubsub_listener():
             logger.error(f"Redis pubsub connection lost: {e}. Retrying in {retry_delay} seconds...")
             await asyncio.sleep(retry_delay)
             retry_delay = min(retry_delay * 2, max_retry_delay)
+        finally:
+            if pubsub:
+                try:
+                    await pubsub.close()
+                except Exception:
+                    pass
