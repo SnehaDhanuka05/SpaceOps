@@ -49,20 +49,25 @@ function EarthMeshInner({
   });
 
   // Calculate ISS 3D Position
-  const [issPos, setIssPos] = useState<[number, number, number]>([0, 0, 0]);
+  const issPos = useMemo(() => {
+    if (issLat !== undefined && issLon !== undefined) {
+      return latLonToVector3(issLat, issLon, 2.25);
+    }
+    return [0, 0, 0] as [number, number, number];
+  }, [issLat, issLon]);
+
   const [trail, setTrail] = useState<THREE.Vector3[]>([]);
 
   useEffect(() => {
     if (issLat !== undefined && issLon !== undefined) {
-      const newPos = latLonToVector3(issLat, issLon, 2.25);
-      setIssPos(newPos);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTrail((prev) => {
-        const newTrail = [...prev, new THREE.Vector3(...newPos)];
+        const newTrail = [...prev, new THREE.Vector3(...issPos)];
         if (newTrail.length > 200) newTrail.shift();
         return newTrail;
       });
     }
-  }, [issLat, issLon]);
+  }, [issLat, issLon, issPos]);
 
   return (
     <group>
@@ -82,7 +87,7 @@ function EarthMeshInner({
           />
         </mesh>
 
-        /* Clouds Mesh (slightly larger) */
+        {/* Clouds Mesh (slightly larger) */}
 
         {/* Atmosphere Glow Mesh (translucent blue border) */}
         <mesh>

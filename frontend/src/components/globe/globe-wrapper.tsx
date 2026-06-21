@@ -30,6 +30,7 @@ function CameraController({
   setIsInteracting: (val: boolean) => void;
 }) {
   const { camera } = useThree();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null);
 
   useFrame(() => {

@@ -16,9 +16,9 @@ class Settings(BaseSettings):
     # API Keys
     NASA_API_KEY: str = "DEMO_KEY"
 
-    # Ollama Settings
-    OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "mistral"
+    # Groq Settings
+    GROQ_API_KEY: str = "your_groq_api_key_here"
+    GROQ_MODEL: str = "llama-3.1-8b-instant"
 
     model_config = SettingsConfigDict(
         env_file=".env",

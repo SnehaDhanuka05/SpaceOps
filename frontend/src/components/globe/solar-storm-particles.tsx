@@ -9,7 +9,9 @@ export default function SolarStormParticles() {
 
   const particleCount = 2000;
 
-  const [positions, initialPhases] = useMemo(() => {
+  const [positions, setPositions] = React.useState<Float32Array | null>(null);
+
+  React.useEffect(() => {
     const pos = new Float32Array(particleCount * 3);
     const phases = new Float32Array(particleCount);
 
@@ -25,7 +27,8 @@ export default function SolarStormParticles() {
 
       phases[i] = Math.random() * Math.PI * 2;
     }
-    return [pos, phases];
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPositions(pos);
   }, []);
 
   useFrame((state, delta) => {
@@ -41,6 +44,8 @@ export default function SolarStormParticles() {
       material.size = hoveredWeatherEventId ? 0.05 : 0.02;
     }
   });
+
+  if (!positions) return null;
 
   return (
     <points ref={pointsRef}>

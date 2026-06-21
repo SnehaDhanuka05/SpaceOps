@@ -8,10 +8,11 @@ from app.core.cache import redis_client
 
 logger = get_logger(__name__)
 
-class OllamaProvider:
+class GroqProvider:
     def __init__(self):
-        self.base_url = settings.OLLAMA_BASE_URL
-        self.model = settings.OLLAMA_MODEL
+        self.api_key = settings.GROQ_API_KEY
+        self.model = settings.GROQ_MODEL
+        self.base_url = "https://api.groq.com/openai/v1/chat/completions"
         self.timeout = httpx.Timeout(60.0, connect=5.0)
 
     def _build_prompt(self, event_type: str, data: str) -> str:
@@ -34,24 +35,27 @@ class OllamaProvider:
             return f"Analyze the following data: {data}"
 
     def _parse_response(self, raw: dict) -> str:
-        return raw.get("response", "").strip()
+        return raw.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
 
     @retry_with_backoff(retries=3, initial_delay=1.0)
     async def explain(self, event_type: str, data: str) -> str:
         prompt = self._build_prompt(event_type, data)
-        url = f"{self.base_url}/api/generate"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
         payload = {
             "model": self.model,
-            "prompt": prompt,
+            "messages": [{"role": "user", "content": prompt}],
             "stream": False
         }
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            res = await client.post(url, json=payload)
+            res = await client.post(self.base_url, headers=headers, json=payload)
             res.raise_for_status()
             raw_response = res.json()
             return self._parse_response(raw_response)
 
-ollama_provider = OllamaProvider()
+groq_provider = GroqProvider()
 
 class AIService:
     @staticmethod
@@ -67,14 +71,14 @@ class AIService:
         except Exception as e:
             logger.warning(f"Failed to query Redis cache for AI explanation: {e}")
             
-        # 2. Generate new explanation using local Ollama
-        logger.info(f"Generating new explanation for {event_type} (ID: {data_id}) using Ollama...")
+        # 2. Generate new explanation using Groq LLM
+        logger.info(f"Generating new explanation for {event_type} (ID: {data_id}) using Groq...")
         try:
-            explanation = await ollama_provider.explain(event_type, data_summary)
+            explanation = await groq_provider.explain(event_type, data_summary)
             logger.info(f"Successfully generated explanation: '{explanation}'")
         except Exception as e:
-            logger.error(f"Ollama generation failed: {e}")
-            explanation = f"AI Explanation is currently unavailable. (Error: Local model service offline)"
+            logger.error(f"Groq generation failed: {e}")
+            explanation = f"AI Explanation is currently unavailable. (Error: LLM service offline)"
             return explanation, False
             
         # 3. Cache the explanation in Redis for 1 hour

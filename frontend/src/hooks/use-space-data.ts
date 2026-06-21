@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { apiFetch } from "@/api/client";
 import {
   ISSTelemetry,
@@ -11,7 +11,7 @@ import {
   AIExplanationResponse,
 } from "@/api/types";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+// WS_URL removed as unused
 
 // --- ISS HOOKS ---
 export function useISS() {
@@ -134,8 +134,9 @@ export function useAIExplanation() {
         localStorage.setItem(cacheKey, JSON.stringify(response.explanation));
       }
       return response.explanation;
-    } catch (err: any) {
-      const msg = err.message || "Failed to fetch AI explanation";
+    } catch (err: unknown) {
+      const error = err as Error;
+      const msg = error.message || "Failed to fetch AI explanation";
       setError(msg);
       throw new Error(msg);
     } finally {

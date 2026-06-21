@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 def test_explain_space_weather_endpoint(client):
     with patch("app.services.ai_service.redis_client.get", return_value=None), \
-         patch("app.services.ai_service.ollama_provider.explain", return_value="Test solar flare summary"):
+         patch("app.services.ai_service.groq_provider.explain", return_value="Test solar flare summary"):
         response = client.post(
             "/api/v1/ai/explain/space-weather",
             json={"data_id": "solar-1", "data_summary": "Solar storm activity"}
@@ -30,7 +30,7 @@ def test_explain_neo_endpoint(client):
 
 def test_explain_launch_endpoint(client):
     with patch("app.services.ai_service.redis_client.get", return_value=None), \
-         patch("app.services.ai_service.ollama_provider.explain", return_value="Test launch briefing"):
+         patch("app.services.ai_service.groq_provider.explain", return_value="Test launch briefing"):
         response = client.post(
             "/api/v1/ai/explain/launch",
             json={"data_id": "launch-1", "data_summary": "Falcon Heavy launch"}

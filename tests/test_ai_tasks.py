@@ -28,7 +28,7 @@ def test_generate_ai_explanations_task(db_session):
     # 2. Mock redis client publish and AIService response
     with patch("app.tasks.ai_tasks.redis_client.publish") as mock_publish, \
          patch("app.services.ai_service.redis_client.get", return_value=None), \
-         patch("app.services.ai_service.ollama_provider.explain", return_value="Explanation success"):
+         patch("app.services.ai_service.groq_provider.explain", return_value="Explanation success"):
          
          # Execute task synchronously with test session
          generate_ai_explanations(db=db_session)
