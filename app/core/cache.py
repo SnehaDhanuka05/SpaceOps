@@ -10,7 +10,8 @@ async_redis_client = aioredis.from_url(
     settings.REDIS_URL, 
     decode_responses=True,
     health_check_interval=30,
-    socket_keepalive=True
+    socket_keepalive=True,
+    socket_timeout=None
 )
 
 def ping_redis() -> bool:

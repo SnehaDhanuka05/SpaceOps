@@ -19,13 +19,16 @@ async def redis_pubsub_listener():
             logger.info("Subscribed to Redis channel 'spaceops_live_channel'")
             retry_delay = 2.0  # Reset retry delay on successful subscription
 
-            async for message in pubsub.listen():
-                if message["type"] == "message":
+            while True:
+                message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
+                if message and message["type"] == "message":
                     try:
                         data = json.loads(message["data"])
                         await manager.broadcast_json(data)
                     except Exception as e:
                         logger.error(f"Error broadcasting message from redis pubsub: {e}")
+                # We can do other non-blocking work here or just continue the loop
+                await asyncio.sleep(0.01)
         except asyncio.CancelledError:
             logger.info("Redis pubsub listener task cancelled")
             break
