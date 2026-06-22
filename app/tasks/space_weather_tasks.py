@@ -1,12 +1,12 @@
 import asyncio
-from app.tasks.celery_app import celery_app
+
 from app.core.db import SessionLocal
 from app.services.space_weather_service import SpaceWeatherService
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-@celery_app.task
+
 def sync_space_weather():
     logger.info("Executing sync_space_weather Celery task...")
     db = SessionLocal()

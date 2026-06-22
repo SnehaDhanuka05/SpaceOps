@@ -1,12 +1,12 @@
 import asyncio
-from app.tasks.celery_app import celery_app
+
 from app.core.db import SessionLocal
 from app.services.launch_service import LaunchService
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-@celery_app.task
+
 def sync_upcoming_launches():
     logger.info("Executing sync_upcoming_launches Celery task...")
     db = SessionLocal()

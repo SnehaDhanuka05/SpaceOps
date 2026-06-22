@@ -9,7 +9,7 @@ import EarthMesh from "./earth-mesh";
 import NEOMarker from "./neo-marker";
 import LaunchMarker from "./launch-marker";
 import { latLonToVector3 } from "@/utils/coords";
-import { useNEOHazards, useLaunchSchedule } from "@/hooks/use-space-data";
+import { useNEOHazards, useLaunchSchedule, useISS } from "@/hooks/use-space-data";
 
 interface GlobeWrapperProps {
   issLat?: number;
@@ -23,11 +23,13 @@ function CameraController({
   issLon,
   trackISS,
   setIsInteracting,
+  earthRef,
 }: {
   issLat?: number;
   issLon?: number;
   trackISS: boolean;
   setIsInteracting: (val: boolean) => void;
+  earthRef: React.RefObject<THREE.Group | null>;
 }) {
   const { camera } = useThree();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +40,11 @@ function CameraController({
       // Get ISS 3D coordinates
       const [x, y, z] = latLonToVector3(issLat, issLon, 2.25);
       const targetPos = new THREE.Vector3(x, y, z);
+
+      // Apply Earth's current rotation to get the world position
+      if (earthRef.current) {
+        targetPos.applyEuler(earthRef.current.rotation);
+      }
 
       // Smoothly lerp control target to ISS position
       controlsRef.current.target.lerp(targetPos, 0.05);
@@ -70,10 +77,12 @@ function CameraController({
 export default function GlobeWrapper({
   trackISS = false,
 }: GlobeWrapperProps) {
+  const earthRef = useRef<THREE.Group>(null);
   const [isInteracting, setIsInteracting] = useState(false);
   const issLocation = useSpaceStore((state) => state.issLocation);
-  const issLat = issLocation?.latitude;
-  const issLon = issLocation?.longitude;
+  const { data: issData } = useISS();
+  const issLat = issLocation?.latitude ?? issData?.latitude;
+  const issLon = issLocation?.longitude ?? issData?.longitude;
   const hoveredNeoId = useSpaceStore((state) => state.hoveredNeoId);
   const hoveredLaunchId = useSpaceStore((state) => state.hoveredLaunchId);
   const setSelectedEntity = useSpaceStore((state) => state.setSelectedEntity);
@@ -117,6 +126,7 @@ export default function GlobeWrapper({
 
           {/* Earth Mesh and its intrinsic visuals (trails, weather) */}
           <EarthMesh
+            earthGroupRef={earthRef}
             issLat={issLat}
             issLon={issLon}
             isInteracting={isInteracting}
@@ -150,6 +160,7 @@ export default function GlobeWrapper({
             issLon={issLon}
             trackISS={trackISS}
             setIsInteracting={setIsInteracting}
+            earthRef={earthRef}
           />
         </Suspense>
       </Canvas>

@@ -1,12 +1,12 @@
 import asyncio
-from app.tasks.celery_app import celery_app
+
 from app.core.db import SessionLocal
 from app.services.iss_service import ISSService
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-@celery_app.task
+
 def sync_iss_position():
     logger.info("Executing sync_iss_position Celery task...")
     db = SessionLocal()

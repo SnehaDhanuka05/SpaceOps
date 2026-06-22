@@ -1,12 +1,12 @@
 import asyncio
-from app.tasks.celery_app import celery_app
+
 from app.core.db import SessionLocal
 from app.services.neo_service import NEOService
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-@celery_app.task
+
 def sync_neo_hazards():
     logger.info("Executing sync_neo_hazards Celery task...")
     db = SessionLocal()

@@ -10,7 +10,7 @@ from app.core.db import engine
 from app.core.cache import ping_redis
 from app.core.pubsub import redis_pubsub_listener
 from app.dependencies import get_redis as get_redis_dep
-
+from app.scheduler import start_scheduler, shutdown_scheduler
 logger = get_logger(__name__)
 
 @asynccontextmanager
@@ -20,6 +20,9 @@ async def lifespan(app: FastAPI):
     
     # Start Redis Pub/Sub listener
     listener_task = asyncio.create_task(redis_pubsub_listener())
+    
+    # Start APScheduler
+    start_scheduler()
     
     # Test Redis Connection
     if ping_redis():
@@ -37,6 +40,7 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown tasks
     logger.info("Shutting down SpaceOps API...")
+    shutdown_scheduler()
     listener_task.cancel()
     await asyncio.gather(listener_task, return_exceptions=True)
 

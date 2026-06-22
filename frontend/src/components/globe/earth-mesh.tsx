@@ -15,6 +15,7 @@ interface EarthMeshProps {
   isInteracting?: boolean;
   showISS?: boolean;
   showWeather?: boolean;
+  earthGroupRef?: React.RefObject<THREE.Group | null>;
   children?: React.ReactNode;
 }
 
@@ -26,8 +27,10 @@ function EarthMeshInner({
   showISS = true,
   showWeather = true,
   children,
+  earthGroupRef,
 }: EarthMeshProps) {
-  const earthRef = useRef<THREE.Group>(null);
+  const internalEarthRef = useRef<THREE.Group>(null);
+  const earthRef = earthGroupRef || internalEarthRef;
   const issRef = useRef<THREE.Group>(null);
   const [isHovered, setHovered] = useState(false);
 

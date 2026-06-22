@@ -1,6 +1,6 @@
 import asyncio
 import json
-from app.tasks.celery_app import celery_app
+
 from app.core.db import SessionLocal
 from app.models.neo import NEOHazard
 from app.models.launch import Launch
@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 logger = get_logger(__name__)
 
-@celery_app.task(queue="ai")
+
 def generate_ai_explanations(db: Session = None):
     logger.info("Starting background task: generate_ai_explanations...")
     db_created = False
