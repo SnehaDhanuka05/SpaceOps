@@ -1,4 +1,5 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from datetime import datetime
 from app.tasks.iss_tasks import sync_iss_position
 from app.tasks.neo_tasks import sync_neo_hazards
 from app.tasks.launch_tasks import sync_upcoming_launches
@@ -14,11 +15,11 @@ def start_scheduler():
     logger.info("Starting APScheduler for periodic tasks...")
     
     # Add jobs
-    scheduler.add_job(sync_iss_position, 'interval', seconds=30, id='sync-iss')
-    scheduler.add_job(sync_neo_hazards, 'interval', seconds=3600, id='sync-neo')
-    scheduler.add_job(sync_upcoming_launches, 'interval', seconds=10800, id='sync-launches')
-    scheduler.add_job(sync_space_weather, 'interval', seconds=3600, id='sync-space-weather')
-    scheduler.add_job(generate_ai_explanations, 'interval', seconds=60, id='generate-ai-explanations')
+    scheduler.add_job(sync_iss_position, 'interval', seconds=30, id='sync-iss', next_run_time=datetime.now())
+    scheduler.add_job(sync_neo_hazards, 'interval', seconds=3600, id='sync-neo', next_run_time=datetime.now())
+    scheduler.add_job(sync_upcoming_launches, 'interval', seconds=10800, id='sync-launches', next_run_time=datetime.now())
+    scheduler.add_job(sync_space_weather, 'interval', seconds=3600, id='sync-space-weather', next_run_time=datetime.now())
+    scheduler.add_job(generate_ai_explanations, 'interval', seconds=60, id='generate-ai-explanations', next_run_time=datetime.now())
     
     scheduler.start()
     logger.info("APScheduler started successfully.")
