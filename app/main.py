@@ -7,6 +7,7 @@ from app.config import settings
 from app.utils.logger import get_logger
 from app.utils.errors import SpaceOpsException, spaceops_exception_handler
 from app.core.db import engine
+from app.models import Base
 from app.core.cache import ping_redis
 from app.core.pubsub import redis_pubsub_listener
 from app.dependencies import get_redis as get_redis_dep
@@ -34,6 +35,10 @@ async def lifespan(app: FastAPI):
     try:
         with engine.connect() as conn:
             logger.info("Successfully connected to database.")
+        
+        # Automatically create database tables if they don't exist
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables verified/created successfully.")
     except Exception as e:
         logger.error(f"Database connection failed: {e}")
         
