@@ -36,7 +36,7 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
   }, []);
 
   return (
-    <header className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between px-6 py-3 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <header className="fixed md:absolute top-4 left-4 right-4 z-40 flex items-center justify-between px-4 md:px-6 py-3 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
       {/* Branding */}
       <div className="flex items-center gap-3">
         <div className="relative flex h-3 w-3">

@@ -62,7 +62,7 @@ export default function SpaceWeatherPanel() {
           disabled={syncWeather.isPending}
           variant="ghost"
           size="icon"
-          className="h-7 w-7 text-zinc-400 hover:text-red-500 hover:bg-white/5"
+          className="h-10 w-10 md:h-7 md:w-7 text-zinc-400 hover:text-red-500 hover:bg-white/5"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${syncWeather.isPending ? "animate-spin" : ""}`} />
         </Button>

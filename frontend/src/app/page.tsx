@@ -45,9 +45,9 @@ export default function Home() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden flex flex-col">
+    <div className="relative w-screen h-screen overflow-x-hidden overflow-y-auto md:overflow-hidden flex flex-col">
       {/* 3D Globe Underlay */}
-      <div className="absolute inset-0 z-0">
+      <div className="fixed inset-0 z-0 pointer-events-none md:pointer-events-auto">
         <ErrorBoundary>
           <GlobeWrapper
             trackISS={trackISS}
@@ -59,14 +59,14 @@ export default function Home() {
       <ControlBar onSyncAll={handleSyncAll} isSyncing={isSyncing} />
 
       {/* Left Overlay Column (ISS control & details) */}
-      <div className="absolute left-4 top-24 bottom-4 w-80 z-20 flex flex-col gap-4 overflow-y-auto pr-1 scrollbar-none">
+      <div className="relative md:absolute md:left-4 md:top-24 md:bottom-4 w-full md:w-80 z-20 flex flex-col gap-4 mt-24 md:mt-0 px-4 md:px-0 md:pr-1 overflow-y-auto scrollbar-none flex-none pointer-events-auto">
         {/* Cam tracking controller */}
         <div className="rounded-xl border border-white/10 bg-black/40 backdrop-blur-md p-4 shadow-[0_4px_20px_rgba(0,0,0,0.3)] space-y-3">
           <span className="text-[10px] text-zinc-500 font-mono block">TACTICAL CAMERA OVERLAY</span>
           <Button
             onClick={() => setTrackISS((prev) => !prev)}
             variant={trackISS ? "default" : "outline"}
-            className={`w-full font-mono text-xs gap-2 transition-all duration-300 ${
+            className={`w-full h-11 md:h-9 font-mono text-xs gap-2 transition-all duration-300 ${
               trackISS
                 ? "bg-cyan-500 hover:bg-cyan-600 text-black shadow-[0_0_15px_rgba(6,182,212,0.5)] border-transparent"
                 : "border-white/10 hover:border-cyan-500/50 hover:bg-cyan-950/10 text-zinc-300"

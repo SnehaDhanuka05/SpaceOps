@@ -8,7 +8,7 @@ interface PanelStackProps {
 
 export default function PanelStack({ children }: PanelStackProps) {
   return (
-    <aside className="absolute right-4 top-24 bottom-4 w-96 z-30 flex flex-col gap-4 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+    <aside className="relative md:absolute md:right-4 md:top-24 md:bottom-4 w-full md:w-96 z-30 flex flex-col gap-4 px-4 pb-8 md:p-0 md:pr-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent flex-none pointer-events-auto">
       {children}
     </aside>
   );
