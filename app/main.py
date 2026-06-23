@@ -60,7 +60,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://space-ops-phi.vercel.app",
+        "https://space-ops-xi.vercel.app",
         "http://localhost:3000"
     ],
     allow_credentials=True,
