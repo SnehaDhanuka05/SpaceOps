@@ -8,7 +8,7 @@ logger = get_logger(__name__)
 
 
 def sync_iss_position():
-    logger.info("Executing sync_iss_position Celery task...")
+    logger.info("Executing sync_iss_position task...")
     db = SessionLocal()
     try:
         loop = asyncio.get_event_loop()
@@ -30,7 +30,7 @@ def sync_iss_position():
             "timestamp": telemetry.timestamp.isoformat()
         }))
     except Exception as e:
-        logger.error(f"Error in sync_iss_position Celery task: {e}")
+        logger.error(f"Error in sync_iss_position task: {e}")
     finally:
         db.close()
 
