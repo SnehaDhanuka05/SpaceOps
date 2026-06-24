@@ -36,7 +36,7 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
   }, []);
 
   return (
-    <header className="fixed md:absolute top-4 left-4 right-4 z-40 flex items-center justify-between px-4 md:px-6 py-3 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <header className="fixed lg:absolute top-4 left-4 right-4 z-40 flex items-center justify-between px-4 lg:px-6 py-3 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
       {/* Branding */}
       <div className="flex items-center gap-3">
         <div className="relative flex h-3 w-3">
@@ -69,7 +69,7 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
       </div>
 
       {/* Center - Layer Toggles */}
-      <div className="hidden md:flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-lg border border-white/10">
+      <div className="hidden lg:flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-lg border border-white/10">
         <span className="text-[10px] font-mono text-zinc-500 mr-2 uppercase">Layers:</span>
         <button onClick={() => setShowISS(!showISS)} className={`group flex items-center p-1.5 rounded-md transition-all duration-300 ease-in-out ${showISS ? 'bg-cyan-500/20 text-cyan-400' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}>
           <Target className="h-4 w-4 shrink-0" />
@@ -101,7 +101,7 @@ export default function ControlBar({ onSyncAll, isSyncing }: ControlBarProps) {
           disabled={isSyncing}
           variant="outline"
           size="sm"
-          className="relative overflow-hidden group h-9 border-white/10 hover:border-cyan-500/50 hover:bg-cyan-950/20 transition-all duration-300 gap-2 font-mono text-xs text-zinc-300 hover:text-cyan-400"
+          className="relative overflow-hidden group h-10 lg:h-9 border-white/10 hover:border-cyan-500/50 hover:bg-cyan-950/20 transition-all duration-300 gap-2 font-mono text-xs text-zinc-300 hover:text-cyan-400"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin text-cyan-400" : "group-hover:rotate-180 transition-transform duration-500"}`} />
           <span>{isSyncing ? "Syncing..." : "Sync All"}</span>
