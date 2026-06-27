@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.models.space_weather import SpaceWeather
-from app.models.raw_response import RawAPIResponse
 from app.services.external_apis import nasa_api_client
 from app.utils.logger import get_logger
 
@@ -18,17 +17,13 @@ class SpaceWeatherService:
         logger.info(f"Fetching space weather (solar flares) from NASA starting from {start_date}...")
         try:
             raw_flares = await nasa_api_client.get_solar_flares(start_date)
-            # Save raw payload
-            raw_record = RawAPIResponse(source="space_weather", payload=raw_flares)
-            db.add(raw_record)
-            db.commit()
         except Exception as e:
-            logger.warning(f"Failed to fetch space weather alerts from API: {e}. Falling back to last saved raw response...")
-            last_raw = db.query(RawAPIResponse).filter(RawAPIResponse.source == "space_weather").order_by(RawAPIResponse.timestamp.desc()).first()
-            if last_raw:
-                raw_flares = last_raw.payload
+            logger.warning(f"Failed to fetch space weather alerts from API: {e}. Returning last known alerts...")
+            last_alerts = SpaceWeatherService.get_weather_alerts(db, limit=100)
+            if last_alerts:
+                return last_alerts
             else:
-                logger.error("No cached space weather raw response available.")
+                logger.error("No cached space weather alerts available.")
                 return []
             
         saved_alerts = []

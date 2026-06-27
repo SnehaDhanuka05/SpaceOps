@@ -60,7 +60,7 @@ export default function Home() {
       <ControlBar onSyncAll={handleSyncAll} isSyncing={isSyncing} />
 
       {/* Left Overlay Column (ISS control & details) */}
-      <div className={`fixed bottom-[84px] left-4 right-4 lg:absolute lg:left-4 lg:top-24 lg:bottom-4 lg:w-80 z-40 flex-col gap-4 mt-24 lg:mt-0 px-0 lg:pr-1 overflow-y-auto scrollbar-none flex-none pointer-events-auto transition-transform duration-300 scale-[0.85] lg:scale-100 origin-bottom lg:origin-top-left ${activeMobilePanel === 'iss' ? 'flex' : 'hidden lg:flex'}`}>
+      <div className={`fixed bottom-[84px] left-4 right-4 lg:right-auto lg:absolute lg:left-4 lg:top-24 lg:bottom-4 lg:w-80 z-40 flex-col gap-4 mt-24 lg:mt-0 px-0 lg:pr-1 overflow-y-auto scrollbar-none flex-none pointer-events-auto transition-transform duration-300 scale-[0.85] lg:scale-100 origin-bottom lg:origin-top-left ${activeMobilePanel === 'iss' ? 'flex' : 'hidden lg:flex'}`}>
         <div className="flex justify-between items-center lg:hidden mb-1 px-2 bg-black/60 rounded-xl p-3 border border-white/10 backdrop-blur-md">
           <span className="text-xs font-mono font-bold text-cyan-400">ISS CONTROL</span>
           <button onClick={() => setActiveMobilePanel(null)}><X className="h-5 w-5 text-zinc-400 hover:text-white" /></button>
@@ -89,7 +89,7 @@ export default function Home() {
 
       {/* Right Sidebar Stack Container */}
       <ErrorBoundary>
-        <PanelStack className={`fixed bottom-[84px] left-4 right-4 lg:absolute lg:right-4 lg:top-24 lg:bottom-4 lg:w-96 z-40 flex-col gap-4 pb-0 lg:pb-8 lg:p-0 lg:pr-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent flex-none pointer-events-auto transition-transform duration-300 scale-[0.85] lg:scale-100 origin-bottom lg:origin-top-right ${activeMobilePanel && activeMobilePanel !== 'iss' ? 'flex' : 'hidden lg:flex'}`}>
+        <PanelStack className={`fixed bottom-[84px] left-4 right-4 lg:left-auto lg:absolute lg:right-4 lg:top-24 lg:bottom-4 lg:w-96 z-40 flex-col gap-4 pb-0 lg:pb-8 lg:p-0 lg:pr-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent flex-none pointer-events-auto transition-transform duration-300 scale-[0.85] lg:scale-100 origin-bottom lg:origin-top-right ${activeMobilePanel && activeMobilePanel !== 'iss' ? 'flex' : 'hidden lg:flex'}`}>
 
           {(activeMobilePanel === 'weather' || !activeMobilePanel) && (
             <div className={`flex-col gap-4 ${activeMobilePanel === 'weather' ? 'flex' : 'hidden lg:flex'}`}>

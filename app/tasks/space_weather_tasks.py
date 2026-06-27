@@ -1,4 +1,4 @@
-import asyncio
+
 
 from app.core.db import SessionLocal
 from app.services.space_weather_service import SpaceWeatherService
@@ -7,27 +7,20 @@ from app.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-def sync_space_weather():
-    logger.info("Executing sync_space_weather Celery task...")
+from app.api.v1.websockets.connections import manager
+
+async def sync_space_weather():
+    logger.info("Executing sync_space_weather task...")
     db = SessionLocal()
     try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        
-    try:
-        results = loop.run_until_complete(SpaceWeatherService.fetch_and_store_weather(db))
-        # Publish update event to Redis live channel
-        from app.core.cache import redis_client
-        import json
-        redis_client.publish("spaceops_live_channel", json.dumps({
+        results = await SpaceWeatherService.fetch_and_store_weather(db)
+        await manager.broadcast_json({
             "event": "weather_update",
             "count": len(results),
             "status": "success"
-        }))
+        })
     except Exception as e:
-        logger.error(f"Error in sync_space_weather Celery task: {e}")
+        logger.error(f"Error in sync_space_weather task: {e}")
     finally:
         db.close()
 

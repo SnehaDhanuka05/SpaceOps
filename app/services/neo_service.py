@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.models.neo import NEOHazard
-from app.models.raw_response import RawAPIResponse
 from app.services.external_apis import nasa_api_client
 from app.utils.transformers import transform_neo_feed
 from app.utils.logger import get_logger
@@ -24,17 +23,13 @@ class NEOService:
         logger.info(f"Syncing NEO hazards from {today_str} to {end_date_str}")
         try:
             raw_data = await nasa_api_client.get_neo_hazards(today_str, end_date_str)
-            # Save raw payload
-            raw_record = RawAPIResponse(source="neo", payload=raw_data)
-            db.add(raw_record)
-            db.commit()
         except Exception as e:
-            logger.warning(f"Failed to fetch NEO hazards from API: {e}. Falling back to last saved raw response...")
-            last_raw = db.query(RawAPIResponse).filter(RawAPIResponse.source == "neo").order_by(RawAPIResponse.timestamp.desc()).first()
-            if last_raw:
-                raw_data = last_raw.payload
+            logger.warning(f"Failed to fetch NEO hazards from API: {e}. Returning last known hazards...")
+            last_hazards = NEOService.get_hazards(db, limit=100)
+            if last_hazards:
+                return last_hazards
             else:
-                logger.error("No cached NEO raw response available.")
+                logger.error("No cached NEO hazards available.")
                 return []
         
         transformed_items = transform_neo_feed(raw_data)

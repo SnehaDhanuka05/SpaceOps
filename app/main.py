@@ -9,7 +9,6 @@ from app.utils.errors import SpaceOpsException, spaceops_exception_handler
 from app.core.db import engine
 from app.models import Base
 from app.core.cache import ping_redis
-from app.core.pubsub import redis_pubsub_listener
 from app.dependencies import get_redis as get_redis_dep
 from app.scheduler import start_scheduler, shutdown_scheduler
 logger = get_logger(__name__)
@@ -19,8 +18,6 @@ async def lifespan(app: FastAPI):
     # Startup tasks
     logger.info("Starting up SpaceOps API...")
     
-    # Start Redis Pub/Sub listener
-    listener_task = asyncio.create_task(redis_pubsub_listener())
     
     # Start APScheduler
     start_scheduler()
@@ -46,8 +43,6 @@ async def lifespan(app: FastAPI):
     # Shutdown tasks
     logger.info("Shutting down SpaceOps API...")
     shutdown_scheduler()
-    listener_task.cancel()
-    await asyncio.gather(listener_task, return_exceptions=True)
 
 app = FastAPI(
     title=settings.APP_NAME,
