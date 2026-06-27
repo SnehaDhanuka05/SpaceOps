@@ -6,15 +6,15 @@ from app.models.neo import NEOHazard
 from app.models.launch import Launch
 from app.models.space_weather import SpaceWeather
 from app.services.ai_service import AIService
-from app.core.cache import redis_client
 from app.utils.logger import get_logger
+from app.api.v1.websockets.connections import manager
 
 from sqlalchemy.orm import Session
 
 logger = get_logger(__name__)
 
 
-def generate_ai_explanations(db: Session = None):
+async def generate_ai_explanations(db: Session = None):
     logger.info("Starting background task: generate_ai_explanations...")
     db_created = False
     if db is None:
@@ -22,30 +22,20 @@ def generate_ai_explanations(db: Session = None):
         db_created = True
     
     try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        
-    try:
         # 1. Process NEO Hazards lacking explanations
         neos = db.query(NEOHazard).filter(
             (NEOHazard.explanation == None) | (NEOHazard.explanation == "")
         ).all()
         for neo in neos:
             data_summary = f"Asteroid name: {neo.name}, reference ID: {neo.neo_reference_id}, miss distance: {neo.miss_distance_km} km, is potentially hazardous: {neo.is_potentially_hazardous_asteroid}."
-            explanation, _ = loop.run_until_complete(
-                AIService.get_explanation("neo", neo.neo_reference_id, data_summary)
-            )
+            explanation, _ = await AIService.get_explanation("neo", neo.neo_reference_id, data_summary)
             neo.explanation = explanation
             db.add(neo)
-            # Publish update to Redis Pub/Sub live channel
-            redis_client.publish("spaceops_live_channel", json.dumps({
+            await manager.broadcast_json({
                 "event": "neo_explanation",
                 "neo_reference_id": neo.neo_reference_id,
                 "explanation": explanation
-            }))
+            })
             
         # 2. Process Upcoming Launches lacking explanations
         launches = db.query(Launch).filter(
@@ -53,17 +43,14 @@ def generate_ai_explanations(db: Session = None):
         ).all()
         for launch in launches:
             data_summary = f"Launch name: {launch.name}, provider: {launch.provider}, pad: {launch.launch_pad}, rocket: {launch.rocket_name}, description: {launch.description}."
-            explanation, _ = loop.run_until_complete(
-                AIService.get_explanation("launch", launch.launch_id, data_summary)
-            )
+            explanation, _ = await AIService.get_explanation("launch", launch.launch_id, data_summary)
             launch.explanation = explanation
             db.add(launch)
-            # Publish update to Redis Pub/Sub live channel
-            redis_client.publish("spaceops_live_channel", json.dumps({
+            await manager.broadcast_json({
                 "event": "launch_explanation",
                 "launch_id": launch.launch_id,
                 "explanation": explanation
-            }))
+            })
 
         # 3. Process Space Weather alerts lacking explanations
         weather_alerts = db.query(SpaceWeather).filter(
@@ -71,20 +58,17 @@ def generate_ai_explanations(db: Session = None):
         ).all()
         for alert in weather_alerts:
             data_summary = f"Space weather event type: {alert.event_type}, event ID: {alert.event_id}, severity: {alert.severity}, details: {alert.details}."
-            explanation, _ = loop.run_until_complete(
-                AIService.get_explanation("space-weather", alert.event_id, data_summary)
-            )
+            explanation, _ = await AIService.get_explanation("space-weather", alert.event_id, data_summary)
             alert.explanation = explanation
             db.add(alert)
-            # Publish update to Redis Pub/Sub live channel
-            redis_client.publish("spaceops_live_channel", json.dumps({
+            await manager.broadcast_json({
                 "event": "weather_explanation",
                 "event_id": alert.event_id,
                 "explanation": explanation
-            }))
+            })
             
         db.commit()
-        logger.info("Successfully finished generate_ai_explanations Celery task.")
+        logger.info("Successfully finished generate_ai_explanations task.")
     except Exception as e:
         logger.error(f"Error executing generate_ai_explanations: {e}")
         db.rollback()

@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.models.launch import Launch
-from app.models.raw_response import RawAPIResponse
 from app.services.external_apis import nasa_api_client
 from app.utils.logger import get_logger
 
@@ -17,17 +16,13 @@ class LaunchService:
         logger.info("Fetching upcoming launches from Space Launch Now API...")
         try:
             data = await nasa_api_client.get_upcoming_launches()
-            # Save raw payload
-            raw_record = RawAPIResponse(source="launches", payload=data)
-            db.add(raw_record)
-            db.commit()
         except Exception as e:
-            logger.warning(f"Failed to fetch launches from API: {e}. Falling back to last saved raw response...")
-            last_raw = db.query(RawAPIResponse).filter(RawAPIResponse.source == "launches").order_by(RawAPIResponse.timestamp.desc()).first()
-            if last_raw:
-                data = last_raw.payload
+            logger.warning(f"Failed to fetch launches from API: {e}. Returning last known launches...")
+            last_launches = LaunchService.get_upcoming_launches(db, limit=100)
+            if last_launches:
+                return last_launches
             else:
-                logger.error("No cached launches raw response available.")
+                logger.error("No cached launches available.")
                 return []
             
         results = data.get("results", [])

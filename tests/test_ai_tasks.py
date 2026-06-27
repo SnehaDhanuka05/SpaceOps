@@ -6,7 +6,8 @@ from app.models.launch import Launch
 from app.models.space_weather import SpaceWeather
 from app.tasks.ai_tasks import generate_ai_explanations
 
-def test_generate_ai_explanations_task(db_session):
+@pytest.mark.asyncio
+async def test_generate_ai_explanations_task(db_session):
     # 1. Setup DB entries lacking explanations
     neo = NEOHazard(
         neo_reference_id="neo-t-1",
@@ -25,13 +26,13 @@ def test_generate_ai_explanations_task(db_session):
     db_session.add_all([neo, launch, weather])
     db_session.commit()
     
-    # 2. Mock redis client publish and AIService response
-    with patch("app.tasks.ai_tasks.redis_client.publish") as mock_publish, \
+    # 2. Mock broadcast_json and AIService response
+    with patch("app.tasks.ai_tasks.manager.broadcast_json") as mock_publish, \
          patch("app.services.ai_service.redis_client.get", return_value=None), \
          patch("app.services.ai_service.groq_provider.explain", return_value="Explanation success"):
          
          # Execute task synchronously with test session
-         generate_ai_explanations(db=db_session)
+         await generate_ai_explanations(db=db_session)
          
          # Re-fetch models from db and check explanations
          db_session.expire_all()
