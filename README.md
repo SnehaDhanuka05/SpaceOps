@@ -11,7 +11,6 @@ SpaceOps is a comprehensive space operations tracking application that provides 
 - **Space Solar Weather Alerts**: Visualize intense solar weather patterns, CMEs, and radiation levels impacting Earth.
 - **Command Palette & Global Search**: Quickly search and navigate across all tracked telemetry via `Cmd+K`.
 - **AI Analytics**: Integrated Claude API on the backend to explain complex space anomalies and hazardous events.
-- **Background Jobs & Caching**: Celery background tasks polling NASA APIs and Redis-powered caching for low-latency updates.
 
 ## Tech Stack
 
@@ -25,7 +24,7 @@ SpaceOps is a comprehensive space operations tracking application that provides 
 ### Backend
 - **Web Framework**: FastAPI (Python)
 - **Database**: PostgreSQL (SQLAlchemy v2)
-- **Caching & Queue**: Redis & Celery
+- **Caching**: Redis
 - **API Clients**: HTTPX (integrating NASA Open APIs & Launch Library API)
 - **AI Integration**: Anthropic Claude API
 
@@ -53,7 +52,7 @@ SpaceOps is a comprehensive space operations tracking application that provides 
    ```
 
 #### Docker Compose Setup
-Run all services (Database, Redis, FastAPI app, Celery worker) via Docker Compose:
+Run all services (Database, Redis, FastAPI app) via Docker Compose:
 ```bash
 docker-compose up --build
 ```
